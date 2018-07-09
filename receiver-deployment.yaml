@@ -1,0 +1,17 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: receiver
+  namespace: test-rabbitmq
+spec:
+  replicas: 3
+  template:
+    metadata:
+      name: receiver
+      labels:
+        app: receiver
+  spec:
+    containers:
+    - image: brightercommand/samples:receiver1.0
+      name: receiver
+  

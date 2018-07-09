@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Greetings", "Greetings\Greetings.csproj", "{4DF067FB-9A20-4DF9-9AF6-E2DFEF7111A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GreetingsPumper", "GreetingsPumper\GreetingsPumper.csproj", "{DCDA22CE-93CF-41B8-B269-24D1CCB62CF9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GreetingsReceiverConsole", "GreetingsReceiverConsole\GreetingsReceiverConsole.csproj", "{80797D5C-7536-4A0D-BA4A-A90E154114EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4DF067FB-9A20-4DF9-9AF6-E2DFEF7111A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DF067FB-9A20-4DF9-9AF6-E2DFEF7111A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DF067FB-9A20-4DF9-9AF6-E2DFEF7111A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DF067FB-9A20-4DF9-9AF6-E2DFEF7111A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCDA22CE-93CF-41B8-B269-24D1CCB62CF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCDA22CE-93CF-41B8-B269-24D1CCB62CF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCDA22CE-93CF-41B8-B269-24D1CCB62CF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCDA22CE-93CF-41B8-B269-24D1CCB62CF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80797D5C-7536-4A0D-BA4A-A90E154114EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80797D5C-7536-4A0D-BA4A-A90E154114EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80797D5C-7536-4A0D-BA4A-A90E154114EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80797D5C-7536-4A0D-BA4A-A90E154114EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

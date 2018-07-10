@@ -12,6 +12,6 @@ spec:
         app: pumper
   spec:
     containers:
-    - image: brightercommand/samples:pumper1.0
+    - image: brightercommand/samples:pumper1.02
       name: pumper
   

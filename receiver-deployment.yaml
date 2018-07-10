@@ -10,8 +10,8 @@ spec:
       name: receiver
       labels:
         app: receiver
-  spec:
-    containers:
-    - image: brightercommand/samples:receiver1.0
-      name: receiver
+    spec:
+      containers:
+      - image: brightercommand/samples:receiver1.02
+        name: receiver
   

@@ -23,98 +23,76 @@ THE SOFTWARE. */
 #endregion
 
 using System;
+using System.Threading.Tasks;
 using Greetings.Adapters.ServiceHost;
 using Greetings.Ports.CommandHandlers;
 using Greetings.Ports.Commands;
 using Greetings.Ports.Mappers;
 using Greetings.TinyIoc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Paramore.Brighter;
 using Paramore.Brighter.MessagingGateway.RMQ;
 using Paramore.Brighter.MessagingGateway.RMQ.MessagingGatewayConfiguration;
 using Paramore.Brighter.ServiceActivator;
+using Paramore.Brighter.ServiceActivator.Extensions.DependencyInjection;
+using Paramore.Brighter.ServiceActivator.Extensions.Hosting;
 using Polly;
 using Serilog;
+using Serilog.AspNetCore;
+using Serilog.Events;
 
 namespace GreetingsReceiverConsole
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.LiterateConsole()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
                 .CreateLogger();
 
-            var container = new TinyIoCContainer();
+            var host = new HostBuilder()
+                .ConfigureServices((hostContext, services) =>
 
-            var handlerFactory = new TinyIocHandlerFactory(container);
-            var messageMapperFactory = new TinyIoCMessageMapperFactory(container);
-            container.Register<IHandleRequests<GreetingEvent>, GreetingEventHandler>();
-
-            var subscriberRegistry = new SubscriberRegistry();
-            subscriberRegistry.Register<GreetingEvent, GreetingEventHandler>();
-
-            //create policies
-            var retryPolicy = Policy
-                .Handle<Exception>()
-                .WaitAndRetry(new[]
                 {
-                    TimeSpan.FromMilliseconds(50),
-                    TimeSpan.FromMilliseconds(100),
-                    TimeSpan.FromMilliseconds(150)
-                });
+                    var connections = new Connection[]
+                    {
+                        new Connection<GreetingEvent>(
+                            new ConnectionName("paramore.example.greeting"),
+                            new ChannelName("greeting.event"),
+                            new RoutingKey("greeting.event"),
+                            timeoutInMilliseconds: 200,
+                            isDurable: true,
+                            highAvailability: true)
+                    };
 
-            var circuitBreakerPolicy = Policy
-                .Handle<Exception>()
-                .CircuitBreaker(1, TimeSpan.FromMilliseconds(500));
+                    var rmqConnnection = new RmqMessagingGatewayConnection
+                    {
+                        AmpqUri = new AmqpUriSpecification(new Uri("amqp://guest:guest@rabbitmq:5672/%2f")),
+                        Exchange = new Exchange("paramore.brighter.exchange"),
+                    };
 
-            var policyRegistry = new PolicyRegistry
-            {
-                { CommandProcessor.RETRYPOLICY, retryPolicy },
-                { CommandProcessor.CIRCUITBREAKER, circuitBreakerPolicy }
-            };
+                    var rmqMessageConsumerFactory = new RmqMessageConsumerFactory(rmqConnnection);
 
-            //create message mappers
-            var messageMapperRegistry = new MessageMapperRegistry(messageMapperFactory)
-            {
-                { typeof(GreetingEvent), typeof(GreetingEventMessageMapper) }
-            };
+                    services.AddServiceActivator(options =>
+                    {
+                        options.Connections = connections;
+                        options.ChannelFactory = new InputChannelFactory(rmqMessageConsumerFactory);
+                    })
+                        .MapperRegistryFromAssemblies(typeof(GreetingEventHandler).Assembly)
+                        .HandlersFromAssemblies(typeof(GreetingEventHandler).Assembly);
 
-            //create the gateway
-            var rmqConnnection = new RmqMessagingGatewayConnection 
-            {
-                AmpqUri  = new AmqpUriSpecification(new Uri("amqp://guest:guest@localhost:5672/%2f")),
-                Exchange = new Exchange("paramore.brighter.exchange"),
-            };
+                    services.AddSingleton<ILoggerFactory>(x => new SerilogLoggerFactory());
+                    services.AddHostedService<ServiceActivatorHostedService>();
+                })
+                .Build();
 
-            var rmqMessageConsumerFactory = new RmqMessageConsumerFactory(rmqConnnection);
-
-            var dispatcher = DispatchBuilder.With()
-                .CommandProcessor(CommandProcessorBuilder.With()
-                    .Handlers(new HandlerConfiguration(subscriberRegistry, handlerFactory))
-                    .Policies(policyRegistry)
-                    .NoTaskQueues()
-                    .RequestContextFactory(new InMemoryRequestContextFactory())
-                    .Build())
-                .MessageMappers(messageMapperRegistry)
-                .DefaultChannelFactory(new InputChannelFactory(rmqMessageConsumerFactory))
-                .Connections(new Connection[]
-                {
-                    new Connection<GreetingEvent>(
-                        new ConnectionName("paramore.example.greeting"),
-                        new ChannelName("greeting.event"),
-                        new RoutingKey("greeting.event"),
-                        timeoutInMilliseconds: 200,
-                        isDurable: true,
-                        highAvailability: true)
-                }).Build();
-
-            dispatcher.Receive();
-
-            Console.WriteLine("Press Enter to stop ...");
-            Console.ReadLine();
-
-            dispatcher.End().Wait();
+            await host.RunAsync();
         }
     }
 }

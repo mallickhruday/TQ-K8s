@@ -73,6 +73,7 @@ namespace GreetingsReceiverConsole
 
                     var rmqConnnection = new RmqMessagingGatewayConnection
                     {
+                        //AmpqUri  = new AmqpUriSpecification(new Uri("amqp://myuser:mypass@localhost:5672/%2f")),
                         AmpqUri = new AmqpUriSpecification(new Uri("amqp://guest:guest@rabbitmq:5672/%2f")),
                         Exchange = new Exchange("paramore.brighter.exchange"),
                     };
@@ -84,8 +85,8 @@ namespace GreetingsReceiverConsole
                         options.Connections = connections;
                         options.ChannelFactory = new InputChannelFactory(rmqMessageConsumerFactory);
                     })
-                        .MapperRegistryFromAssemblies(typeof(GreetingEventHandler).Assembly)
-                        .HandlersFromAssemblies(typeof(GreetingEventHandler).Assembly);
+                    .MapperRegistryFromAssemblies(typeof(GreetingEventHandler).Assembly)
+                    .HandlersFromAssemblies(typeof(GreetingEventHandler).Assembly);
 
                     services.AddSingleton<ILoggerFactory>(x => new SerilogLoggerFactory());
                     services.AddHostedService<ServiceActivatorHostedService>();

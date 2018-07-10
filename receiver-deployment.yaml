@@ -12,6 +12,6 @@ spec:
         app: receiver
     spec:
       containers:
-      - image: brightercommand/samples:receiver1.02
+      - image: brightercommand/samples:receiver1.05
         name: receiver
   
